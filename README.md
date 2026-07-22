@@ -1,4 +1,4 @@
-# Paketo Buildpack for Liberty
+# Paketo Buildpack for Liberty test
 
 ## Buildpack ID: `paketo-buildpacks/liberty`
 ## Registry URLs: `docker.io/paketobuildpacks/liberty`
