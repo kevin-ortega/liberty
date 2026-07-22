@@ -44,11 +44,14 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
+          # Save the PR commit SHA before switching branches.
+          PR_SHA=$(git rev-parse HEAD)
+
           ENCODED_PAT=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['PAT'], safe=''))")
           git remote set-url private "https://x-access-token:${ENCODED_PAT}@github.ibm.com/ortegake/libertybuildpack.git"
           git fetch private "${BASE_BRANCH}"
           git checkout -b merge-target "private/${BASE_BRANCH}"
-          git merge --no-ff "HEAD@{2}" -m "Merge PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          git merge --no-ff "${PR_SHA}" -m "Merge PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
           git push private "merge-target:refs/heads/${BASE_BRANCH}"
 
           echo "Merged PR #${{ github.event.pull_request.number }} into ${BASE_BRANCH} on private repo."
