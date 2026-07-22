@@ -22,23 +22,19 @@ jobs:
 
       - name: Push branch to private repo
         env:
-          # PRIVATE_REPO_HOST should be just the host + path, no scheme.
-          # e.g. github.ibm.com/ortegake/libertybuildpack.git
-          PRIVATE_REPO_HOST: ${{ secrets.PRIVATE_REPO_HOST }}
           PAT: ${{ secrets.PRIVATE_REPO_PAT }}
           TARGET_BRANCH: pr-${{ github.event.pull_request.number }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
 
-          git remote add private "https://x-access-token:${PAT}@${PRIVATE_REPO_HOST}"
+          git remote add private "https://x-access-token:${PAT}@github.ibm.com/ortegake/libertybuildpack.git"
           git push private "HEAD:refs/heads/${TARGET_BRANCH}" --force
 
           echo "Pushed to ${TARGET_BRANCH} on private repo."
 
       - name: Merge branch into private repo default branch
         env:
-          PRIVATE_REPO_HOST: ${{ secrets.PRIVATE_REPO_HOST }}
           PAT: ${{ secrets.PRIVATE_REPO_PAT }}
           TARGET_BRANCH: pr-${{ github.event.pull_request.number }}
           BASE_BRANCH: main
