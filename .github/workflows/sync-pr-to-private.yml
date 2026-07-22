@@ -35,6 +35,11 @@ jobs:
 
           echo "Pushed to ${TARGET_BRANCH} on private repo."
 
+      - name: Configure git identity
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
       - name: Merge branch into private repo default branch
         env:
           PAT: ${{ secrets.PRIVATE_REPO_PAT }}
