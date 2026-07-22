@@ -22,23 +22,21 @@ jobs:
 
       - name: Push branch to private repo
         env:
-          PRIVATE_REPO_URL: ${{ secrets.PRIVATE_REPO_URL }}
           PAT: ${{ secrets.PRIVATE_REPO_PAT }}
           TARGET_BRANCH: pr-${{ github.event.pull_request.number }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
 
-          AUTHED_URL="${PRIVATE_REPO_URL/https:\/\//https://x-access-token:${PAT}@}"
-
-          git remote add private "${AUTHED_URL}"
+          # Percent-encode the token so special chars (+, /, =) don't break the URL.
+          ENCODED_PAT=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['PAT'], safe=''))")
+          git remote add private "https://x-access-token:${ENCODED_PAT}@github.ibm.com/ortegake/libertybuildpack.git"
           git push private "HEAD:refs/heads/${TARGET_BRANCH}" --force
 
           echo "Pushed to ${TARGET_BRANCH} on private repo."
 
       - name: Merge branch into private repo default branch
         env:
-          PRIVATE_REPO_URL: ${{ secrets.PRIVATE_REPO_URL }}
           PAT: ${{ secrets.PRIVATE_REPO_PAT }}
           TARGET_BRANCH: pr-${{ github.event.pull_request.number }}
           BASE_BRANCH: main
@@ -46,8 +44,8 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
-          AUTHED_URL="${PRIVATE_REPO_URL/https:\/\//https://x-access-token:${PAT}@}"
-
+          ENCODED_PAT=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['PAT'], safe=''))")
+          git remote set-url private "https://x-access-token:${ENCODED_PAT}@github.ibm.com/ortegake/libertybuildpack.git"
           git fetch private "${BASE_BRANCH}"
           git checkout -b merge-target "private/${BASE_BRANCH}"
           git merge --no-ff "HEAD@{2}" -m "Merge PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
